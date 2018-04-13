@@ -228,18 +228,16 @@ function loadImage(files) {
     const formData = new FormData();
     formData.append('title', files[0].name);
     formData.append('image', files[0])
-    console.log(picId)
     xhr.open('POST', 'https://neto-api.herokuapp.com/pic');
     xhr.send(formData);
     xhr.addEventListener('load', event => {
         mask.style.display = 'none';
         mask.src = '';
+        removeForms();
         showError(files);
         imageLoader.style = 'display : none';
         const response = JSON.parse(xhr.response);
         picId = response.id;
-        console.log(picId)
-      //  menuUrl.value = 'file://' + window.location.pathname + '?id=' + picId;
         menuUrl.value = window.location.host + window.location.pathname + '?id=' + picId;
         console.log(response);
         currentImage.src = response.url;
@@ -484,9 +482,14 @@ function commentsOnOff() {
     elem.parentNode.removeChild(elem);
  });
 
-Array.from(document.querySelectorAll('.comments__form')).forEach(el => {
-    wrap.removeChild(el);
-});
+function removeForms() {
+    Array.from(document.querySelectorAll('.comments__form')).forEach(el => {
+        wrap.removeChild(el);
+    });
+}
+
+removeForms();
+
 
 function copyUrl() {
     menuUrl.select(); 
