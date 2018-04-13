@@ -181,7 +181,7 @@ function clickModeDraw() {
     modeNew.style = "display : none";
     modeShare.style = "display : none";
     modeComments.style = "display : none";
-    wrap.removeEventListener('click', commentOnClick);
+    document.removeEventListener('click', commentOnClick);
     drawMode();
 }
 
@@ -239,10 +239,10 @@ function loadImage(files) {
         const response = JSON.parse(xhr.response);
         picId = response.id;
         
-        menuUrl.value = window.location.host + window.location.pathname + '?id=' + picId;
+        menuUrl.value = window.location.href + '?id=' + picId;
         console.log(response);
         currentImage.src = response.url;
-        clickComments();
+        clickModeShare();
         webSocket();
     }) 
 }
