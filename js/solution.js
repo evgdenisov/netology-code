@@ -91,7 +91,7 @@ drag.addEventListener('mouseup', event => {
 function webSocket() {
     connection = new WebSocket(`wss://neto-api.herokuapp.com/pic/${picId}`);
     connection.addEventListener('open', event => {
-        console.log('open');
+        console.log(event);
     });
     connection.addEventListener('message', event => {
         const data = JSON.parse(event.data);
@@ -239,6 +239,7 @@ function loadImage(files) {
         const response = JSON.parse(xhr.response);
         picId = response.id;
         menuUrl.value = window.location.host + window.location.pathname + '?id=' + picId;
+        window.location.href = menuUrl.value;
         console.log(response);
         currentImage.src = response.url;
         webSocket();
