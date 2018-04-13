@@ -44,11 +44,10 @@ if ((picHref.indexOf('?id=')) == -1) {
     onOpen();
 }
 else {
-    clickComments();
     picId = picHref.substring(picHref.indexOf('?id=') + 4);
-//
     menuUrl.value = window.location.href;
     webSocket();
+    clickComments();
 }
 
 selectColor();
@@ -174,7 +173,7 @@ function clickComments() {
     modeShare.style.display = "none";
     modeDraw.style.display = "none";
     modeNew.style.display = "none";
-    wrap.addEventListener('click', commentOnClick);
+    document.addEventListener('click', commentOnClick);
 }
 
 function clickModeDraw() {
@@ -205,7 +204,7 @@ function clickBurger() {
     modeDraw.style = "display : online-block";
     modeShare.style = "display : online-block";
     canvas.style.display = 'none';
-    wrap.removeEventListener('click', commentOnClick);
+    document.removeEventListener('click', commentOnClick);
 }
 
 function emptyComment(bodyCom) {
@@ -242,6 +241,7 @@ function loadImage(files) {
         window.location.href = menuUrl.value;
         console.log(response);
         currentImage.src = response.url;
+        clickComments();
         webSocket();
     }) 
 }
@@ -440,15 +440,15 @@ function commentOnClick(event) {
     const top = event.clientY;
     const left = event.clientX;
     const id = commentId(left, top);
-    event.stopPropagation();
-    if (event.target != mask) {
-        return;
-    }
+    //event.stopPropagation();
+    console.log(event.target)
     if (commentsOff.checked) {
         return;
     }
-    createCommentForm(left, top, id); 
-    document.querySelector(`#${commentId(left, top)}`).querySelector('.comments__marker-checkbox').checked = true;
+    if (event.target == currentImage || event.target == mask) {
+        createCommentForm(left, top, id); 
+        document.querySelector(`#${commentId(left, top)}`).querySelector('.comments__marker-checkbox').checked = true;
+    }
 }
 
 function commentId (left, top) {
