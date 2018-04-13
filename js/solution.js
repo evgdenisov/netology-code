@@ -241,7 +241,7 @@ function loadImage(files) {
         imageLoader.style = 'display : none';
         const response = JSON.parse(xhr.response);
         picId = response.id;
-        menuUrl.value = window.location.protocol + window.location.host + window.location.pathname + '?id=' + picId;
+        menuUrl.value = window.location.protocol + '//' + window.location.host + window.location.pathname + '?id=' + picId;
         currentImage.src = response.url;
         clickModeShare();
         webSocket();
