@@ -189,10 +189,11 @@ function clickModeShare() {
     modeShare.style = "display : inline-block";
     burger.style = "display : inline-block";
     shareTools.style = "display : inline-block";
+    commentsTools.style.display = "none";
     modeNew.style = "display : none";
     modeComments.style = "display : none";
     modeDraw.style = "display : none";
-    wrap.removeEventListener('click', commentOnClick);
+    document.removeEventListener('click', commentOnClick);
 }
 
 function clickBurger() {
@@ -237,8 +238,8 @@ function loadImage(files) {
         imageLoader.style = 'display : none';
         const response = JSON.parse(xhr.response);
         picId = response.id;
+        
         menuUrl.value = window.location.host + window.location.pathname + '?id=' + picId;
-       // window.location.href = menuUrl.value;
         console.log(response);
         currentImage.src = response.url;
         clickComments();
