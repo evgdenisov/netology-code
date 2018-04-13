@@ -106,9 +106,8 @@ function processing(data) {
         const time = data.comment.timestamp;
         const message = data.comment.message;
         createCommentForm(left, top, id);
-        showMessages(id, time, message)
+        showMessages(id, time, message);
     }
-    console.log(data)
     if (data.event == 'pic') {
         currentImage.src = data.pic.url;
         picId = data.pic.id;
@@ -120,6 +119,7 @@ function processing(data) {
         }
     }
     if (data.event == 'mask') {
+        console.log(data)
         mask.src = data.url;
         mask.style.display = 'inline-block';
     }
@@ -373,6 +373,10 @@ modeNew.appendChild(inputFile);
 
 document.body.addEventListener('drop', event => {
     event.preventDefault();
+    if (event.target == currentImage || event.target == mask) {
+        return;
+    }
+
     if (currentImage.attributes.src.value !== "") {
         errorMessage.textContent = 'Чтобы загрузить новое изображение, пожалуйста, воспользуйтесь "Загрузить новое" в меню';
         error.style = 'display : inline-block';
@@ -457,7 +461,6 @@ function commentOnClick(event) {
     const top = event.clientY;
     const left = event.clientX;
     const id = commentId(left, top);
-    //event.stopPropagation();
     console.log(event.target)
     if (commentsOff.checked) {
         return;
