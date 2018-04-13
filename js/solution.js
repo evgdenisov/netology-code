@@ -238,7 +238,7 @@ function loadImage(files) {
         const response = JSON.parse(xhr.response);
         picId = response.id;
         menuUrl.value = window.location.host + window.location.pathname + '?id=' + picId;
-        window.location.href = menuUrl.value;
+       // window.location.href = menuUrl.value;
         console.log(response);
         currentImage.src = response.url;
         clickComments();
