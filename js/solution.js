@@ -239,9 +239,12 @@ function loadImage(files) {
         showError(files);
         imageLoader.style = 'display : none';
         const response = JSON.parse(xhr.response);
-        picId = response.id;
+        console.log(window.location.href)
         
-        menuUrl.value = window.location.href + '?id=' + picId;
+        picId = response.id;
+        menuUrl.value = window.location.protocol + window.location.host + window.location.pathname + '?id=' + picId;
+        console.log(picId)
+        //menuUrl.value = window.location.href + '?id=' + picId;
         console.log(response);
         currentImage.src = response.url;
         clickModeShare();
