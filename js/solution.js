@@ -239,7 +239,8 @@ function loadImage(files) {
         const response = JSON.parse(xhr.response);
         picId = response.id;
         console.log(picId)
-        menuUrl.value = 'file://' + window.location.pathname + '?id=' + picId;
+      //  menuUrl.value = 'file://' + window.location.pathname + '?id=' + picId;
+        menuUrl.value = window.location.host + window.location.pathname + '?id=' + picId;
         console.log(response);
         currentImage.src = response.url;
         webSocket();
