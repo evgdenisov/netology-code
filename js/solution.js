@@ -391,6 +391,12 @@ function closeCheckBox(event) {
     }
 }
 
+function disableCheckBox() {
+    Array.from(document.querySelectorAll('.comments__marker-checkbox')).forEach(el => {
+        console.log(el)
+    })
+}
+
 function createCommentForm(left, top, id) {
     if (!(document.querySelector(`#${id}`) === null)) {
         return;
