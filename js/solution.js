@@ -207,6 +207,7 @@ function clickBurger() {
     modeShare.style = "display : online-block";
     canvas.style.display = 'none';
     document.removeEventListener('click', commentOnClick);
+    error.style = 'display : none';
     anableCheckBox();
 }
 
@@ -239,13 +240,8 @@ function loadImage(files) {
         showError(files);
         imageLoader.style = 'display : none';
         const response = JSON.parse(xhr.response);
-        console.log(window.location.href)
-        
         picId = response.id;
         menuUrl.value = window.location.protocol + window.location.host + window.location.pathname + '?id=' + picId;
-        console.log(picId)
-        //menuUrl.value = window.location.href + '?id=' + picId;
-        console.log(response);
         currentImage.src = response.url;
         clickModeShare();
         webSocket();
