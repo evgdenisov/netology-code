@@ -182,6 +182,7 @@ function clickModeDraw() {
     modeShare.style = "display : none";
     modeComments.style = "display : none";
     document.removeEventListener('click', commentOnClick);
+    disableCheckBox();
     drawMode();
 }
 
@@ -206,6 +207,7 @@ function clickBurger() {
     modeShare.style = "display : online-block";
     canvas.style.display = 'none';
     document.removeEventListener('click', commentOnClick);
+    anableCheckBox();
 }
 
 function emptyComment(bodyCom) {
@@ -391,11 +393,20 @@ function closeCheckBox(event) {
         event.target.checked = true;
     }
 }
+function defaultCheckBox(event) {
+    event.preventDefault();
+}
 
 function disableCheckBox() {
     Array.from(document.querySelectorAll('.comments__marker-checkbox')).forEach(el => {
-        console.log(el)
+        el.addEventListener('click', defaultCheckBox);
     })
+}
+
+function anableCheckBox() {
+    Array.from(document.querySelectorAll('.comments__marker-checkbox')).forEach(el => {
+        el.removeEventListener('click', defaultCheckBox)
+    }) 
 }
 
 function createCommentForm(left, top, id) {
