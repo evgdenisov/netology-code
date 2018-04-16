@@ -34,13 +34,29 @@ let picId = '';
 let shiftX = 0;
 let shiftY = 0;
 let picHref = window.location.href;
+let bodyW = document.body.clientWidth;
+let bodyH = document.body.clientHeight;
 
-mask.style.display = 'none';
+mask.classList.add('hidden');
 mask.src = '';
 
+let time1 = Date.now();
+console.log(time1, 'time1')
+
+window.addEventListener('unload', event => {
+    console.log('unload')
+    let time = Date.now();
+    console.log(time)
+})
+window.addEventListener('reload', event => {
+    console.log('reload')
+})
+if (!(localStorage.picHref === undefined)) {
+    currentImage.src = localStorage.picHref;
+    console.log("est' href")
+} 
 if ((picHref.indexOf('?id=')) == -1) {
-    console.log('no picId');
-    mask.style.display = 'none';
+    mask.classList.add('hidden');
     onOpen();
 }
 else {
@@ -55,7 +71,6 @@ selectColor();
 
 
 function mouseMove(event) {
-    event.preventDefault();
     let x = event.pageX - shiftX;
     let y = event.pageY - shiftY;
 
@@ -73,15 +88,17 @@ function mouseMove(event) {
     menu.style.top = `${y}px`;
 }
 
-drag.addEventListener('mousedown', (event) => {
+function dropMenu(event) {
     const bounds = menu.getBoundingClientRect();
     shiftX = event.pageX - bounds.left - window.pageXOffset;
     shiftY = event.pageY - bounds.top - window.pageYOffset;
-    drag.addEventListener('mousemove', mouseMove);
-    drag.addEventListener('mouseleave', () => {
-        drag.removeEventListener('mousemove', mouseMove);
+    menu.addEventListener('mousemove', mouseMove);
+    document.addEventListener('mouseup', () => {
+        menu.removeEventListener('mousemove', mouseMove);
     });
-});
+}
+
+drag.addEventListener('mousedown', dropMenu);
 
 drag.addEventListener('mouseup', event => {
     drag.removeEventListener('mousemove', mouseMove);
@@ -90,7 +107,7 @@ drag.addEventListener('mouseup', event => {
 function webSocket() {
     connection = new WebSocket(`wss://neto-api.herokuapp.com/pic/${picId}`);
     connection.addEventListener('open', event => {
-        console.log(event);
+        console.log('open');
     });
     connection.addEventListener('message', event => {
         const data = JSON.parse(event.data);
@@ -110,18 +127,17 @@ function processing(data) {
     }
     if (data.event == 'pic') {
         currentImage.src = data.pic.url;
+        
         picId = data.pic.id;
         showComments(data.pic);
         if (data.pic.mask != undefined) {
-            console.log('ЕСТЬ МАСКА')
             mask.src = data.pic.mask;
-            mask.style.display = 'inline-block';
+            mask.classList.remove('hidden');
         }
     }
     if (data.event == 'mask') {
-        console.log(data)
         mask.src = data.url;
-        mask.style.display = 'inline-block';
+        mask.classList.remove('hidden');
     }
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 }
@@ -162,53 +178,53 @@ function showComments (response) {
 }
 
 function onOpen () { 
-    modeShare.style.display = "none";
-    modeComments.style.display = "none";
-    modeDraw.style.display = "none";
-    burger.style.display = "none"; 
+    menu.dataset.state = 'initial';
 }
 
-function clickComments() {
-    commentsTools.style.display = "inline-block";
-    modeShare.style.display = "none";
-    modeDraw.style.display = "none";
-    modeNew.style.display = "none";
+function clickComments() { 
+    menu.dataset.state = 'selected';
+    modeComments.dataset.state = 'selected';
     document.addEventListener('click', commentOnClick);
 }
 
-function clickModeDraw() {
-    drawTools.style = "display : inline-block";
-    modeNew.style = "display : none";
-    modeShare.style = "display : none";
-    modeComments.style = "display : none";
+function clickModeDraw() { 
+    menu.dataset.state = 'selected';
+    modeDraw.dataset.state = 'selected';
     document.removeEventListener('click', commentOnClick);
     disableCheckBox();
     drawMode();
 }
 
-function clickModeShare() {
-    modeShare.style = "display : inline-block";
-    burger.style = "display : inline-block";
-    shareTools.style = "display : inline-block";
-    commentsTools.style.display = "none";
-    modeNew.style = "display : none";
-    modeComments.style = "display : none";
-    modeDraw.style = "display : none";
+function clickModeShare() { 
+    menu.dataset.state = 'selected';
+    modeShare.dataset.state = 'selected';
+    checkMenuPosition();
     document.removeEventListener('click', commentOnClick);
 }
 
+function closeAllModes() {
+    Array.from(document.querySelectorAll('.menu__item.mode')).forEach(modeEl => {
+        modeEl.dataset.state = 'initial';
+    })
+}
+
 function clickBurger() {
-    commentsTools.style = "display : none";
-    drawTools.style = "display : none";
-    shareTools.style = "display : none";
-    modeNew.style = "display : inline-block";
-    modeComments.style = "display : online-block";
-    modeDraw.style = "display : online-block";
-    modeShare.style = "display : online-block";
-    canvas.style.display = 'none';
+    closeAllModes();
+    error.classList.add('hidden');
+    menu.dataset.state = 'default';
+    document.removeEventListener('mouseup', sendMask);
     document.removeEventListener('click', commentOnClick);
-    error.style = 'display : none';
     anableCheckBox();
+    checkMenuPosition();
+}
+
+function checkMenuPosition() {
+    let bounds = menu.getBoundingClientRect();
+    if (document.body.clientWidth < bounds.right) {
+        let x = Number(menu.style.left.substring(0, menu.style.left.indexOf('px')));
+        let newX = x + document.body.clientWidth - bounds.right;
+        menu.style.left = `${newX}px`;
+    }
 }
 
 function emptyComment(bodyCom) {
@@ -226,7 +242,7 @@ function deleteEmptyForms() {
 }
 
 function loadImage(files) {
-    imageLoader.style = 'display : inline-block';
+    imageLoader.classList.remove('hidden');
     const xhr = new XMLHttpRequest();
     const formData = new FormData();
     formData.append('title', files[0].name);
@@ -234,15 +250,14 @@ function loadImage(files) {
     xhr.open('POST', 'https://neto-api.herokuapp.com/pic');
     xhr.send(formData);
     xhr.addEventListener('load', event => {
-        mask.style.display = 'none';
+        mask.classList.add('hidden');
         mask.src = '';
         removeForms();
-        showError(files);
-        imageLoader.style = 'display : none';
+        imageLoader.classList.add('hidden');
         const response = JSON.parse(xhr.response);
         picId = response.id;
         menuUrl.value = window.location.protocol + '//' + window.location.host + window.location.pathname + '?id=' + picId;
-        currentImage.src = response.url;
+        currentImage.src = localStorage.picHref = response.url; 
         clickModeShare();
         webSocket();
     }) 
@@ -252,14 +267,14 @@ function loadImage(files) {
 function showError(files) {
     if (files[0].type !== 'image/png' && files[0].type !== 'image/jpeg') {
         errorMessage.textContent = 'Неверный формат файла. Пожалуйста, выберите изображение в формате .jpg или .png.';
-        error.style = 'display : inline-block';
+        error.classList.remove('hidden');
         onOpen();
     }
     else {
-        error.style = 'display : none';
+        error.classList.add('hidden');
         clickModeShare();
+        return true;
     }
-    return;
 }
 
 function selectColor() {
@@ -289,43 +304,40 @@ function selectColor() {
     })
 }
 
-wrap.appendChild(canvas);
-canvas.width = wrap.clientWidth;
-canvas.height = wrap.clientHeight;
-canvas.display = 'none';
-canvas.style.zIndex = '150';
-canvas.style.position = 'absolute';
-canvas.style.left = '0';
-canvas.style.top = '0';
-canvas.style.display = 'none';
-ctx = canvas.getContext('2d'); 
+
+function resizeCanvas() {
+    canvas.width = mask.width = document.querySelector('.current-image').width;
+    canvas.height =  mask.height = document.querySelector('.current-image').height;
+}
+    wrap.appendChild(canvas);
+    canvas.classList.add('hidden');
+    ctx = canvas.getContext('2d'); 
+    wrap.appendChild(mask);
+    mask.classList.add('mask');
+
+    
 
 
-mask.classList.add('mask');
-
-mask.width = wrap.clientWidth;
-mask.height = wrap.clientHeight;
-mask.style.left = '0';
-mask.style.top = '0';
-mask.style.zIndex = '100';
-mask.style.position = 'absolute';
-wrap.appendChild(mask);
 
 
 function drawMode() { 
-    canvas.style.display = 'inline-block'; 
-    ctx.lineJoin = 'round';
-    ctx.lineCap = 'round';
-    ctx.lineWidth = 4;
+    canvas.classList.remove('hidden');
+    document.addEventListener('mouseup', sendMask);
+    resizeCanvas();
 }
 
 canvas.addEventListener('mousedown', (event) => {
+    x = event.layerX;
+    y = event.layerY;
     draw(event);
     canvas.addEventListener('mousemove', draw);
 });
 
-function sendMask() {
+function sendMask(event) {
     canvas.removeEventListener('mousemove', draw);
+    if (event.target !== canvas) {
+        return;
+    }
     now = Date.now();
     if (now - timer > 3000) {
         canvas.toBlob(blob => connection.send(blob));
@@ -333,17 +345,22 @@ function sendMask() {
     }
 }
 
-canvas.addEventListener('mouseup', sendMask);
+let x = {};
+let y = {};
  
 function draw(event) {
-    if (event.target != canvas) {
-        return;
-    }
+    ctx.lineJoin = 'round';
+    ctx.lineCap = 'round';
+    ctx.lineWidth = 4;
+    ctx.globalCompositeOperation = 'source-over';
     ctx.strokeStyle = color;
     ctx.beginPath();
+    ctx.moveTo(x, y);
     ctx.lineTo(event.layerX, event.layerY);
     ctx.closePath();
     ctx.stroke();
+    x = event.layerX;
+    y = event.layerY;
 }
 
 
@@ -367,23 +384,21 @@ menuCopyBttn.addEventListener('click', copyUrl);
 
 inputFile.type = 'file';
 inputFile.accept = 'image/jpeg, image/png';
-inputFile.style = 'position : absolute; left : 0; top : 0; width : 100%; height : 100%; visibility : hidden';
+inputFile.classList.add('inputFile');
 modeNew.appendChild(inputFile);
 
 
 document.body.addEventListener('drop', event => {
     event.preventDefault();
-    if (event.target == currentImage || event.target == mask) {
-        return;
-    }
-
     if (currentImage.attributes.src.value !== "") {
         errorMessage.textContent = 'Чтобы загрузить новое изображение, пожалуйста, воспользуйтесь "Загрузить новое" в меню';
-        error.style = 'display : inline-block';
+        error.classList.remove('hidden');
         return;
     }
     const files = Array.from(event.dataTransfer.files);
-    loadImage(files);
+    if (showError(files)) { 
+        loadImage(files);
+    }
 });
 
 document.body.addEventListener('dragover', event => event.preventDefault());
@@ -421,12 +436,11 @@ function createCommentForm(left, top, id) {
     
     newCommentsForm.id = id;
     newCommentsForm.style = `left : ${left - 21}px; top : ${top - 14}px;`;
-    newCommentsForm.style.zIndex = '250';
     if (commentsOff.checked) {
-        newCommentsForm.style.display = 'none';
+        newCommentsForm.classList.add('hidden');
     }
     if (commentsOn.checked) {
-        newCommentsForm.style.display = 'inline-block';
+        newCommentsForm.classList.remove('hidden');
     }
     wrap.appendChild(newCommentsForm);
     const markerCheckBox = newCommentsForm.querySelector('.comments__marker-checkbox');
@@ -439,12 +453,35 @@ function createCommentForm(left, top, id) {
     newCommentsForm.querySelector('.comments__submit').addEventListener('click', event => {
         event.preventDefault();
         const newCommentForm = event.target.parentNode.parentNode;
-        const messageText = newCommentForm.querySelector('textarea').value;
+        let messageText = newCommentForm.querySelector('textarea').value;
+        if (messageText == '') {
+            return;
+        }
+        console.log(newCommentForm.querySelector('textarea'))
         showCommentsLoader(id);
         sendComment(picId, left, top, messageText);
+        newCommentForm.querySelector('textarea').value = '';
     })
     
 }
+
+window.addEventListener('resize', event => {
+    let x = Number(menu.style.left.substring(0, menu.style.left.indexOf('px')));
+    let y = Number(menu.style.top.substring(0, menu.style.top.indexOf('px')));
+    let changeX = bodyW - document.body.clientWidth;
+    let changeY = bodyH - document.body.clientHeight;
+    if ((x - changeX < 0) || (y - changeY < 0)) {
+        return;
+    }
+    let newX = x - changeX;
+    let newY = y - changeY;
+
+    menu.style.left = `${newX}px`;
+    menu.style.top = `${newY}px`;
+    bodyW = document.body.clientWidth;
+    bodyH = document.body.clientHeight;
+    resizeCanvas();
+})
 
 function sendComment(picId, left, top, messageText) {
     const xhr = new XMLHttpRequest();
@@ -461,7 +498,6 @@ function commentOnClick(event) {
     const top = event.clientY;
     const left = event.clientX;
     const id = commentId(left, top);
-    console.log(event.target)
     if (commentsOff.checked) {
         return;
     }
@@ -491,17 +527,19 @@ function hideCommentsLoader(id) {
 function commentsOnOff() {
     Array.from(document.querySelectorAll('.comments__form')).forEach(el => {
         if (commentsOff.checked) {
-            el.style.display = 'none';
+            el.classList.add('hidden');
         }
         if (commentsOn.checked) {
-            el.style.display = 'inline-block';
+            el.classList.remove('hidden');
         }
     })
 }
 
- Array.from(commentsForm.querySelectorAll('.comment')).forEach( elem => {
-    elem.parentNode.removeChild(elem);
- });
+function removeCommetns() {
+    Array.from(commentsForm.querySelectorAll('.comment')).forEach( elem => {
+        elem.parentNode.removeChild(elem);
+    });
+}
 
 function removeForms() {
     Array.from(document.querySelectorAll('.comments__form')).forEach(el => {
@@ -509,11 +547,10 @@ function removeForms() {
     });
 }
 
-removeForms();
-
-
 function copyUrl() {
     menuUrl.select(); 
     document.execCommand('copy'); 
 }
 
+removeCommetns();
+removeForms();
