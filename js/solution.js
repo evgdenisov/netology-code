@@ -36,6 +36,7 @@ let shiftY = 0;
 let picHref = window.location.href;
 let bodyW = document.body.clientWidth;
 let bodyH = document.body.clientHeight;
+let commentResize = {};
 
 mask.classList.add('hidden');
 mask.src = '';
@@ -138,6 +139,8 @@ function processing(data) {
         
         picId = data.pic.id;
         showComments(data.pic);
+        console.log('------------------', data.pic);
+        commentResize = data.pic;
         if (data.pic.mask != undefined) {
             mask.src = data.pic.mask;
             mask.classList.remove('hidden');
@@ -180,6 +183,7 @@ function showComments (response) {
         const timestamp = comments[comment].timestamp;
         const message = comments[comment].message;
         const id = commentId(left, top);
+        console.log('showcomments')
         createCommentForm(left, top, id);
         showMessages(id, timestamp, message);
     }
@@ -198,7 +202,7 @@ function clickComments() {
 function clickModeDraw() { 
     menu.dataset.state = 'selected';
     modeDraw.dataset.state = 'selected';
-    document.removeEventListener('click', commentOnClick);
+    currentImage.removeEventListener('click', commentOnClick);
     disableCheckBox();
     drawMode();
 }
@@ -207,7 +211,7 @@ function clickModeShare() {
     menu.dataset.state = 'selected';
     modeShare.dataset.state = 'selected';
     checkMenuPosition();
-    document.removeEventListener('click', commentOnClick);
+    currentImage.removeEventListener('click', commentOnClick);
 }
 
 function closeAllModes() {
@@ -222,7 +226,7 @@ function clickBurger() {
     error.classList.add('hidden');
     menu.dataset.state = 'default';
     document.removeEventListener('mouseup', sendMask);
-    document.removeEventListener('click', commentOnClick);
+    currentImage.removeEventListener('click', commentOnClick);
     anableCheckBox();
     checkMenuPosition();
 }
@@ -439,6 +443,8 @@ function anableCheckBox() {
 }
 
 function createCommentForm(left, top, id) {
+    const newLeft = left - 21 + currentImage.getBoundingClientRect().left;
+    const newTop = top - 14 + currentImage.getBoundingClientRect().top;
     if (!(document.querySelector(`#${id}`) === null)) {
         return;
     } 
@@ -446,7 +452,7 @@ function createCommentForm(left, top, id) {
     const newCommentsForm = commentsForm.cloneNode(true);
     
     newCommentsForm.id = id;
-    newCommentsForm.style = `left : ${left - 21}px; top : ${top - 14}px;`;
+    newCommentsForm.style = `left : ${newLeft}px; top : ${newTop}px;`;
     if (commentsOff.checked) {
         newCommentsForm.classList.add('hidden');
     }
@@ -468,7 +474,6 @@ function createCommentForm(left, top, id) {
         if (messageText == '') {
             return;
         }
-        console.log(newCommentForm.querySelector('textarea'))
         showCommentsLoader(id);
         sendComment(picId, left, top, messageText);
         newCommentForm.querySelector('textarea').value = '';
@@ -492,6 +497,8 @@ window.addEventListener('resize', event => {
     bodyW = document.body.clientWidth;
     bodyH = document.body.clientHeight;
     resizeCanvas();
+    removeForms();
+    showComments(commentResize);
 })
 
 function sendComment(picId, left, top, messageText) {
@@ -505,7 +512,7 @@ function sendComment(picId, left, top, messageText) {
     })
 }
 
-document.addEventListener('click', event => {
+currentImage.addEventListener('click', event => {
    // console.log('layerX:', event.layerX, '|')
    console.log(event)
 })
@@ -514,6 +521,8 @@ function commentOnClick(event) {
     const top = event.layerY;
     const left = event.layerX;
     const id = commentId(left, top);
+    console.log(left)
+    console.log(event.x, event.layerX, event.clientX, currentImage.x)
     if (commentsOff.checked) {
         return;
     }
@@ -524,7 +533,7 @@ function commentOnClick(event) {
 }
 
 function commentId (left, top) {
-    return 'l' + `${left}` + 't' + `${top}`;
+    return 'l' + `${Math.round(left)}` + 't' + `${Math.round(top)}`;
 }
 
 function showCommentsLoader(id) {
