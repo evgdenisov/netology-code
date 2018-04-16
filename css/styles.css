@@ -34,6 +34,7 @@ body {
   font-size: 0;
   border: 1px solid #51606e;
   z-index: 1000;
+  white-space: nowrap;
 }
 
 .menu__item {
@@ -79,10 +80,23 @@ body {
   position: absolute;
   top: 50%;
   left: 50%;
+
   transform: translate(-50%, -50%);
   display: block;
   box-shadow: 0.1rem 0.17rem 1rem #000000;
   z-index: 0;
+}
+
+canvas, .mask {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: block;
+  z-index: 100;
+}
+canvas {
+  z-index: 150;
 }
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~ иконки на панели ~~~~~~~~~~~~~~~~~~~~~~~~~~ */
@@ -426,6 +440,16 @@ body {
 .comment__message {
   color: #ffffff;
   line-height: 130%;
+  white-space: pre-wrap;
+}
+
+.inputFile {
+  position : absolute; 
+  left : 0; 
+  top : 0; 
+  width : 100%; 
+  height : 100%; 
+  visibility : hidden;
 }
 
 .comments__body input, .comments__body textarea {
@@ -634,15 +658,13 @@ body {
   display: none;
 }
 
-.menu[data-state="initial"] > .menu__item.drag, .menu[data-state="initial"] > .menu__item.new, .menu[data-state="initial"] > .menu__item.burger {
+.menu[data-state="initial"] > .menu__item.drag, .menu[data-state="initial"] > .menu__item.new {
   display: inline-block;
 }
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~ default ~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
-.menu[data-state="default"] > .menu__item.burger {
-  display: none;
-}
+
 
 .menu[data-state="default"] > .mode {
   display: inline-block;
@@ -664,4 +686,8 @@ body {
 
 .menu[data-state="selected"] > .menu__item[data-state="selected"], .menu__item[data-state="selected"] + .tool {
   display: inline-block;
+}
+
+.hidden {
+  display: none;
 }
