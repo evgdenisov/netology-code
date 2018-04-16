@@ -41,25 +41,29 @@ mask.classList.add('hidden');
 mask.src = '';
 
 let time1 = Date.now();
-console.log(time1, 'time1')
+
 
 window.addEventListener('unload', event => {
     console.log('unload')
-    let time = Date.now();
-    console.log(time)
+    connection.close();
 })
 window.addEventListener('reload', event => {
     console.log('reload')
 })
-if (!(localStorage.picHref === undefined)) {
-    currentImage.src = localStorage.picHref;
-    console.log("est' href")
-} 
 if ((picHref.indexOf('?id=')) == -1) {
     mask.classList.add('hidden');
+    console.log('ne po ssilke')
     onOpen();
-}
+    if (!(localStorage.id === undefined)) {
+        picId = localStorage.id;
+        webSocket();
+        console.log("est' id")
+        localStorage.clear();
+        clickModeShare();
+    } 
+} 
 else {
+    console.log('po sssilke')
     picId = picHref.substring(picHref.indexOf('?id=') + 4);
     menuUrl.value = window.location.href;
     webSocket();
@@ -111,7 +115,11 @@ function webSocket() {
     });
     connection.addEventListener('message', event => {
         const data = JSON.parse(event.data);
+        console.log(data)
         processing(data);
+    })
+    connection.addEventListener('close', event => {
+        console.log('ws closed')
     })
 }
 
@@ -184,7 +192,7 @@ function onOpen () {
 function clickComments() { 
     menu.dataset.state = 'selected';
     modeComments.dataset.state = 'selected';
-    document.addEventListener('click', commentOnClick);
+    currentImage.addEventListener('click', commentOnClick);
 }
 
 function clickModeDraw() { 
@@ -210,6 +218,7 @@ function closeAllModes() {
 
 function clickBurger() {
     closeAllModes();
+    canvas.classList.add('hidden');
     error.classList.add('hidden');
     menu.dataset.state = 'default';
     document.removeEventListener('mouseup', sendMask);
@@ -256,8 +265,8 @@ function loadImage(files) {
         imageLoader.classList.add('hidden');
         const response = JSON.parse(xhr.response);
         picId = response.id;
+        localStorage.id = picId;
         menuUrl.value = window.location.protocol + '//' + window.location.host + window.location.pathname + '?id=' + picId;
-        currentImage.src = localStorage.picHref = response.url; 
         clickModeShare();
         webSocket();
     }) 
@@ -372,6 +381,7 @@ modeDraw.addEventListener('click', clickModeDraw);
 modeComments.addEventListener('click', clickComments);
 modeShare.addEventListener('click', clickModeShare);
 modeNew.addEventListener('click', (event) => {
+    error.classList.add('hidden');
     inputFile.click();
 }) 
 inputFile.addEventListener('change', () => {
@@ -410,6 +420,7 @@ function closeCheckBox(event) {
     if (!(event === undefined)) {
         event.target.checked = true;
     }
+
 }
 function defaultCheckBox(event) {
     event.preventDefault();
@@ -494,9 +505,14 @@ function sendComment(picId, left, top, messageText) {
     })
 }
 
+document.addEventListener('click', event => {
+   // console.log('layerX:', event.layerX, '|')
+   console.log(event)
+})
+
 function commentOnClick(event) {
-    const top = event.clientY;
-    const left = event.clientX;
+    const top = event.layerY;
+    const left = event.layerX;
     const id = commentId(left, top);
     if (commentsOff.checked) {
         return;
