@@ -135,7 +135,6 @@ function showError(files) {
     }
     else {
         error.classList.add('hidden');
-        clickModeShare();
         return true;
     }
 }
@@ -155,10 +154,11 @@ function loadImage(files) {
         imageLoader.classList.add('hidden');
         const response = JSON.parse(xhr.response);
         picId = response.id;
-      /*  localStorage.id = picId; */
-        menuUrl.value = window.location.protocol + '//' + window.location.host + window.location.pathname + '?id=' + picId;
-        clickModeShare();
+        const link = window.location.protocol + '//' + window.location.host + window.location.pathname + '?id=' + picId
+        menuUrl.value = link + '&share';
+        location.href = link;
         webSocket();
+        clickModeShare();
     }) 
 }
 
@@ -217,7 +217,6 @@ function processing(data) {
         if (data.pic.mask != undefined) {
             mask.src = data.pic.mask;
             mask.classList.remove('hidden');
-            clickComments();
         }
     }
     if (data.event == 'mask') {
@@ -371,10 +370,6 @@ function emptyComment(bodyCom) {
 }
 
 
-
-
-
-
 function showCommentsLoader(id) {
     const commentsBody = document.querySelector(`#${id} .comments__body`);
     const input = commentsBody.querySelector('.comments__input');
@@ -520,19 +515,23 @@ modeNew.appendChild(inputFile);
 if ((picHref.indexOf('?id=')) == -1) {
     mask.classList.add('hidden');
     onOpen();
-/*    if (!(localStorage.id === undefined)) {
-        picId = localStorage.id;
-        webSocket();
-        localStorage.clear();
-        closeAllModes();
-        clickModeShare();
-    } */
 } 
 else {
-    picId = picHref.substring(picHref.indexOf('?id=') + 4);
-    menuUrl.value = window.location.href;
-    clickComments();
-    webSocket();
+    let indexOfId = picHref.indexOf('?id=') + 4;
+    let indexOfShare = picHref.indexOf('&share');
+    if (indexOfShare == -1) {
+        picId = picHref.substring(indexOfId);
+        webSocket();
+        clickModeShare();
+    }
+    else {
+        picId = picHref.substring(indexOfId, indexOfShare);
+        webSocket();
+        clickComments();
+
+    }
+    menuUrl.value = window.location.href + '&share';  
+      
 }
 
 selectColor();
