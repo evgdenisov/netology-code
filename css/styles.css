@@ -379,6 +379,7 @@ canvas {
   position: absolute;
   top: calc(4 * var(--menu-top));
   left: calc(3 * var(--menu-left));  
+  z-index: 250;
 }
 
 .comments__marker {
