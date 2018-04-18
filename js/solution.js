@@ -446,9 +446,6 @@ function canvasMouseDown(event) {
     y = event.offsetY;
     draw(event);
     canvas.addEventListener('mousemove', draw);
-    canvas.addEventListener('click', event => {
-        console.log(event)
-    })
 }
 
 function draw(event) {
@@ -552,9 +549,6 @@ menuCopyBttn.addEventListener('click', copyUrl);
 document.body.addEventListener('drop', dropFiles);
 document.body.addEventListener('dragover', event => event.preventDefault());
 window.addEventListener('resize', windowResize);
-document.addEventListener('click', event => {
-    console.log(event)
-})
 
 drag.addEventListener('mouseup', event => {
     drag.removeEventListener('mousemove', mouseMove);
