@@ -292,8 +292,8 @@ function commentsOnOff() {
 
 
 function commentOnClick(event) {
-    const top = event.layerY;
-    const left = event.layerX;
+    const top = event.offsetY;
+    const left = event.offsetX;
     const id = commentId(left, top);
     if (commentsOff.checked) {
         return;
@@ -441,10 +441,14 @@ function resizeCanvas() {
 }
 
 function canvasMouseDown(event) {
-    x = event.layerX;
-    y = event.layerY;
+    const bounds = menu.getBoundingClientRect();
+    x = event.offsetX;
+    y = event.offsetY;
     draw(event);
     canvas.addEventListener('mousemove', draw);
+    canvas.addEventListener('click', event => {
+        console.log(event)
+    })
 }
 
 function draw(event) {
@@ -455,11 +459,11 @@ function draw(event) {
     ctx.strokeStyle = color;
     ctx.beginPath();
     ctx.moveTo(x, y);
-    ctx.lineTo(event.layerX, event.layerY);
+    ctx.lineTo(event.offsetX, event.offsetY);
     ctx.closePath();
     ctx.stroke();
-    x = event.layerX;
-    y = event.layerY;
+    x = event.offsetX;
+    y = event.offsetY;
 }
 
 function sendMask(event) {
@@ -548,6 +552,9 @@ menuCopyBttn.addEventListener('click', copyUrl);
 document.body.addEventListener('drop', dropFiles);
 document.body.addEventListener('dragover', event => event.preventDefault());
 window.addEventListener('resize', windowResize);
+document.addEventListener('click', event => {
+    console.log(event)
+})
 
 drag.addEventListener('mouseup', event => {
     drag.removeEventListener('mousemove', mouseMove);
