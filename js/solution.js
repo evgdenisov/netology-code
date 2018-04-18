@@ -292,8 +292,8 @@ function commentsOnOff() {
 
 
 function commentOnClick(event) {
-    const top = event.offsetY;
-    const left = event.offsetX;
+    const top = event.offsetY + currentImage.getBoundingClientRect().top;
+    const left = event.offsetX + currentImage.getBoundingClientRect().left;
     const id = commentId(left, top);
     if (commentsOff.checked) {
         return;
@@ -304,13 +304,14 @@ function commentOnClick(event) {
     }
 }
 
+
 function commentId (left, top) {
     return 'l' + `${Math.round(left)}` + 't' + `${Math.round(top)}`;
 }
 
 function createCommentForm(left, top, id) {
-    const newLeft = left - 21 + currentImage.getBoundingClientRect().left;
-    const newTop = top - 14 + currentImage.getBoundingClientRect().top;
+    const newLeft = left - 21;
+    const newTop = top - 14;
     if (!(document.querySelector(`#${id}`) === null)) {
         return;
     } 
@@ -441,7 +442,6 @@ function resizeCanvas() {
 }
 
 function canvasMouseDown(event) {
-    const bounds = menu.getBoundingClientRect();
     x = event.offsetX;
     y = event.offsetY;
     draw(event);
